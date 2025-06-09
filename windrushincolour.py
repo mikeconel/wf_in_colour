@@ -202,14 +202,10 @@ def evaluation_form():
                     st.image(logo_path, width=150)
                 with colb:
                     st.header(":rainbow[Windrush in Colour Exhibition]")
-            #with col2:
-            #    st.header(":rainbow[Windrush in Colour Exhibition]")
-            #st.markdown("<div style='margin-bottom: -350px; padding-bottom: 0px'></div>", unsafe_allow_html=True)  # Adjust space here
+         
             with col2:
-            #a2,b2,c2 =st.columns(3)
-            #with b2:
                 pass
-           # st.image(logo_path, width=150)
+           
             with col2:
                 st.markdown(
             "<h2 style='color: #C4A747; text-align:center; text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;'>Evaluation Form & Dashboard</h2>",
@@ -217,7 +213,7 @@ def evaluation_form():
         )
             with col2:
                 st.markdown(
-                "<p style='color: blue; text-align: justify;'>Windrush Foundation values the support we receive from the community, we want to hear your feedback of our in-person or online events. We are committed to giving you, our supporters the highest quality products and service. Your anonymous feedback will help us to ensure that both our in-person and online events are excelling in quality and variety. Click on the button below to take part. It usually takes between 4 to 6 minutes to complete. Thank you in advance.</p>",
+                "<p style='color: blue; text-align: justify;'>Windrush Foundation values the support we receive from the community, we want to hear your feedback of our in-person or online events. We are committed to giving you, our supporters the highest quality products and service. Your feedback will help us to ensure that both our in-person and online events are excelling in quality and variety. Click on the button below to take part. It usually takes between 4 to 6 minutes to complete. Thank you in advance.</p>",
                 unsafe_allow_html=True
             )
         tab1, tab2 = st.tabs(["Evaluation Form", "Windrush in Colour Dashboard"])
@@ -228,26 +224,26 @@ def evaluation_form():
                     a,col_b,c = st.columns([1,4,1])
                 
                     with col_b:
-                        name = st.text_input("Name")
-                        gender = st.selectbox("Gender:", ["Male", "Female"])
-                        age = st.number_input("Age", min_value=15, step=1)
-                        ethnicity = st.selectbox("Ethnicity", ["None",
+                        name = st.text_input("**Name**")
+                        gender = st.selectbox("**Gender:**", ["Male", "Female"])
+                        age = st.number_input("**Age**", min_value=15, step=1)
+                        ethnicity = st.selectbox("**Ethnicity**", ["None",
                         "African", "Asian", "Asian British", "Black British", "Black mixed", "Caribbean",
                         "European", "White British", "White Mixed", "Other"
                         ])
                     #if ethnicity == "Other":
                         #ethnicity = st.text_input("Please enter your ethnicity:")
-                        q6 = st.text_input("If you are visiting as a school, please enter name of school")
-                        location = st.text_input("Postcode")
+                        q6 = st.text_input("**If you are visiting as a school, please enter name of school**")
+                        location = st.text_input("**Postcode**")
 
                 with st.container():
                     a,col_b,c = st.columns([1,4,1])
                     with col_b:
-                        marketing = st.selectbox("How did you hear about this exhibition:", [
+                        marketing = st.selectbox("**How did you hear about this exhibition:**", [
                         "None", "Radio", "TV", "Email", "Word of Mouth", "Social Media"
                         ])
                    
-                        social_media = st.selectbox("If via Social Media, select the social media platform:", [
+                        social_media = st.selectbox("**If via Social Media, select the social media platform:**", [
                             "None", "YouTube", "Facebook", "Instagram", "WhatsApp", "Messenger", "LinkedIn",
                             "Telegram", "Signal", "Snapchat", "TikTok"
                             ])
@@ -255,7 +251,7 @@ def evaluation_form():
                 with st.container():
                     a,col_b,c = st.columns([1,4,1])
                     with col_b:
-                        q1 = st.selectbox("How did you find the exhibition story?",
+                        q1 = st.selectbox("**How did you find the exhibition story?**",
                             [5, 4, 3, 2, 1],
                             format_func=lambda x: {
                             5: "5. Very Interesting",
@@ -264,16 +260,16 @@ def evaluation_form():
                             2: "2. Boring",
                             1: "1. Did not like it at all"
                             }[x])
-                        q2 = st.text_input("How did the story make you feel?")
-                        q3 = st.selectbox("How did you find the venue?",
+                        q2 = st.text_input("**How did the story make you feel?**",max_chars=300)
+                        q3 = st.selectbox("**How did you find the venue?**",
                         ["None ", "Very Comfortable", "Uncomfortable", "Couldn't wait to leave"])
-                        q4 = st.selectbox("Will you attend more Windrush events/exhibitions?",
+                        q4 = st.selectbox("**Will you attend more Windrush events/exhibitions?**",
                         [" ", "Absolutely Yes", "Maybe", "No"])
-                        feedback = st.text_area("Please use this space to add further comments about this exhibition")
-                        q5 = st.text_input("If you would like to keep informed about future Windrush Foundation events, please leave a valid e-mail address.")
+                        feedback = st.text_area("**Please use this space to add further comments about this exhibition.**",max_chars=800)
+                        q5 = st.text_input("**If you would like to keep informed about future Windrush Foundation events, please leave a valid e-mail address.**")
                     a,col_b,c = st.columns([1,4,1])
                     with c:
-                        submitted = st.form_submit_button("Submit")
+                        submitted = st.form_submit_button("**Submit**")
                 #submitted = st.form_submit_button("Submit")
 
                 if submitted:
@@ -411,8 +407,10 @@ def evaluation_form():
                 with st.container():
                
                     st.markdown("""<hr style='border: 2px; solid #C4A747;'>""", unsafe_allow_html=True)
-                    tab1, tab2 = st.tabs(["Sentiment Analysis","Not sure Yet"])
+                    tab1, tab2, tab3 = st.tabs(["Time Series Data","Sentiment Analysis","Show Evaluation Database"])
                     with tab1:
+                        pass #TIME SERIES Graph
+                    with tab2:
                         ans=df['feedback']
                         #st.write(ans)
                         total_sentiments = sentiment_analysis(ans)
@@ -431,18 +429,32 @@ def evaluation_form():
                         st.write("Sentiment Analysis Results:")
                         #st.table(df_sentiments)
                         st.dataframe(df_sentiments)
-    
-    
-                        
-                        #for k,v in total_sentiments.items():
-                            #st.write(k,v)
-                        
-                    with tab2:
-                        pass   
 
-                    if st.button("Show Evaluation Database"):
+                        #social_media_counts = df["social_media"].value_counts().sort_values(ascending=False)
+                        l1=df_sentiments['Positive'].iloc[0]
+                        l2=df_sentiments['Neutral'].iloc[0]
+                        l3=df_sentiments['Negative'].iloc[0]
+                        sentiments_count=[l1,l2,l3]
+                      
+                        sentiments_count_x=['Positive','Neutral','Negative']
+                        mycolours=["gold","blue","red"]
+                        myexplode = [0.2, 0, 0]
+                        fig, ax = plt.subplots(figsize=(2,2))
+                        ax.pie(sentiments_count,labels=sentiments_count_x, autopct='%1.1f%%', 
+                               colors=mycolours, explode=myexplode,textprops={'fontsize': 3},startangle=90)
+                        #ax.set_title("Sentiment Analysis", fontsize=12)
+                        # Position legend to the right and adjust font size
+                        ax.legend(sentiments_count_x, loc="right", bbox_to_anchor=(1.2, 0.5), fontsize=4)
+
+                        st.pyplot(fig)
+
+
+
+                    with tab3:
                         st.dataframe(df)
 
+                    # if st.button("Show Evaluation Database"):
+                    #     st.dataframe(df)
 
                 if st.button("🔒 Logout"):
                     st.session_state['authenticated'] = False
