@@ -198,15 +198,18 @@ def evaluation_form():
     logo_path = Image.open(logo)
    
     with st.expander(" ", expanded=True):
-        with st.container():     
-            ###col1,col2,col3 = st.columns([2,10,1])
-            col1,col2,col3 = st.columns([1,8,1])
+        with st.container():
+            col1,col2,col3 = st.columns([1,1,1])     
             with col2:
-                cola,colb=st.columns([1,3])
+                st.image(logo_path, width=200)
+            col1,col2,col3 = st.columns([1,8,1])
+            #with col3:
+                #st.image(logo_path, width=200)
+                #cola,colb=st.columns([1,3])
                 #with cola:
                     #st.image(logo_path, width=150)
-                with colb:
-                    st.image(logo_path, width=200)
+                #with colb:
+                    #st.image(logo_path, width=200)
                     #st.header(":rainbow[Windrush in Colour Exhibition]")
          
             with col2:
