@@ -30,9 +30,9 @@ def evaluation_form():
     custom_css = """
         <style>
          
-       /*Dynamically keeping page max width to 800px*/ 
+       /*Dynamically keeping page max width to 700px*/ 
           .block-container {
-            max-width: 80%;
+            max-width: 70%;
             margin: auto;
         }
         img {
@@ -180,6 +180,11 @@ def evaluation_form():
             border-radius: 8px !important;
         }
 
+       hr {
+            border: 1px solid #C4A747 !important;
+        }
+
+
         </style>
         """
     #Apply custom CSS
@@ -189,7 +194,7 @@ def evaluation_form():
     now = datetime.now()
     mydate = now.strftime("%Y-%m-%d")
     # Logo
-    logo = "images/Windrush Foundation 30th Anniversary 2025_R4.png"
+    logo = "images/Windrush In Colour Exhibition_LOGO.png"
     logo_path = Image.open(logo)
    
     with st.expander(" ", expanded=True):
@@ -197,11 +202,12 @@ def evaluation_form():
             ###col1,col2,col3 = st.columns([2,10,1])
             col1,col2,col3 = st.columns([1,8,1])
             with col2:
-                cola,colb=st.columns([3,6])
-                with cola:
-                    st.image(logo_path, width=150)
+                cola,colb=st.columns([1,3])
+                #with cola:
+                    #st.image(logo_path, width=150)
                 with colb:
-                    st.header(":rainbow[Windrush in Colour Exhibition]")
+                    st.image(logo_path, width=200)
+                    #st.header(":rainbow[Windrush in Colour Exhibition]")
          
             with col2:
                 pass
@@ -216,12 +222,12 @@ def evaluation_form():
                 "<p style='color: blue; text-align: justify;'>Windrush Foundation values the support we receive from the community, we want to hear your feedback of our in-person or online events. We are committed to giving you, our supporters the highest quality products and service. Your feedback will help us to ensure that both our in-person and online events are excelling in quality and variety. Click on the button below to take part. It usually takes between 4 to 6 minutes to complete. Thank you in advance.</p>",
                 unsafe_allow_html=True
             )
-        tab1, tab2 = st.tabs(["Evaluation Form", "Windrush in Colour Dashboard"])
+        tab1, tab2 = st.tabs(["**Evaluation Form**", "**Windrush in Colour Dashboard**"])
 
         with tab1:
             with st.form("questionnaire"):
                 with st.container():
-                    a,col_b,c = st.columns([1,4,1])
+                    a,col_b,c = st.columns([1,3,1])
                 
                     with col_b:
                         name = st.text_input("**Name**")
@@ -237,7 +243,7 @@ def evaluation_form():
                         location = st.text_input("**Postcode**")
 
                 with st.container():
-                    a,col_b,c = st.columns([1,4,1])
+                    a,col_b,c = st.columns([1,3,1])
                     with col_b:
                         marketing = st.selectbox("**How did you hear about this exhibition:**", [
                         "None", "Radio", "TV", "Email", "Word of Mouth", "Social Media"
@@ -249,7 +255,7 @@ def evaluation_form():
                             ])
 
                 with st.container():
-                    a,col_b,c = st.columns([1,4,1])
+                    a,col_b,c = st.columns([1,3,1])
                     with col_b:
                         q1 = st.selectbox("**How did you find the exhibition story?**",
                             [5, 4, 3, 2, 1],
@@ -267,7 +273,7 @@ def evaluation_form():
                         [" ", "Absolutely Yes", "Maybe", "No"])
                         feedback = st.text_area("**Please use this space to add further comments about this exhibition.**",max_chars=800)
                         q5 = st.text_input("**If you would like to keep informed about future Windrush Foundation events, please leave a valid e-mail address.**")
-                    a,col_b,c = st.columns([1,4,1])
+                    a,col_b,c = st.columns([1,3,2])
                     with c:
                         submitted = st.form_submit_button("**Submit**")
                 #submitted = st.form_submit_button("Submit")
@@ -296,8 +302,10 @@ def evaluation_form():
                         ))
 
                         conn.commit()
-                        st.success("✅ Your response has been recorded!")
+                        time.sleep(0.5)
+                        st.success("**✅ Your response has been recorded!**")
                         st.write_stream(stream_data)
+                        st.write(" ")
                         st.markdown("<p style=font-style:'Arial;color:red'>Why not head over to our website? www.windrushfoundation.com</p>",
                                     unsafe_allow_html=True)
                         conn.close()
@@ -321,11 +329,13 @@ def evaluation_form():
                     st.error("❌ Incorrect password")
 
         if st.session_state['authenticated']:
-            cola,colb,colc,=st.columns([1,3,1])
+            cola,colb,colc,=st.columns([1,8,1])
             with colb:
-                st.subheader("")
-                st.subheader("📊 Windrush In Colour Dashboard")
-            st.markdown("""<hr style='border: 2px; solid #C4A747;'>""", unsafe_allow_html=True)
+                st.subheader("📊:rainbow[Windrush In Colour Dashboard]")
+                #st.write("**Login below to see :rainbow['Windrush In Colour'] exhibition insights.**")
+            st.markdown("""<hr style='border: 2px solid #C4A747;'>""", unsafe_allow_html=True)
+
+
             try:
                 conn = exhibition_database()
                 df = pd.read_sql_query("SELECT * FROM windrushincolour", conn)
