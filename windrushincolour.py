@@ -195,18 +195,16 @@ def evaluation_form():
     now = datetime.now()
     mydate = now.strftime("%Y-%m-%d")
     # Logo
-    logo = "images/Windrush In Colour Exhibition_LOGO.png"
+    logo = "images/Windrush In Colour Exhibition_LOGO 3.png"
     logo_path = Image.open(logo)
    
     with st.expander(" ", expanded=True):
         with st.container():
+            st.image(logo_path)
             col1,col2,col3 = st.columns([1,1,1])     
-            with col1:
-                st.image(logo_path, width=200)
-            with col2:
-                st.image(logo_path, width=200)
-            with col3:
-                st.image(logo_path, width=200)
+            #with col2:
+                #st.image(logo_path, width=200)
+            
             col1,col2,col3 = st.columns([1,8,1])
             #with col3:
                 #st.image(logo_path, width=200)
