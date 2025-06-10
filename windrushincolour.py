@@ -11,7 +11,8 @@ st.set_page_config(
     page_title="Windrush In Colour Evaluation Form",
     layout="wide",
     #page_icon="📊"
-    page_icon="images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
+    #page_icon="images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
+    page_icon="images/Windrush In Colour Exhibition_LOGO.png"
 )
 
 # Database connection function
@@ -200,7 +201,11 @@ def evaluation_form():
     with st.expander(" ", expanded=True):
         with st.container():
             col1,col2,col3 = st.columns([1,1,1])     
+            with col1:
+                st.image(logo_path, width=200)
             with col2:
+                st.image(logo_path, width=200)
+            with col3:
                 st.image(logo_path, width=200)
             col1,col2,col3 = st.columns([1,8,1])
             #with col3:
@@ -369,7 +374,7 @@ def evaluation_form():
                         with col2:
                             #st.markdown("**<span style='color: red;'>Age Distribution</span>**", unsafe_allow_html=True)
                             fig, ax = plt.subplots()
-                            ax.hist(df["age"], bins=10, color='skyblue', edgecolor='black')
+                            ax.hist(df["age"], bins=10, color='blue', edgecolor='gold')
                             ax.set_xlabel("Age")
                             ax.set_ylabel("Number of Attendees")
                             st.pyplot(fig)
@@ -379,8 +384,14 @@ def evaluation_form():
                         with col2:
                             #st.markdown("**<span style='color: red;'>Ethnicity Distribution</span>**", unsafe_allow_html=True)
                             ethnicity_count = df["ethnicity"].value_counts().sort_values(ascending=False)
-                            fig, ax = plt.subplots()
-                            ax.pie(ethnicity_count, labels=ethnicity_count.index, autopct='%1.1f%%')
+                            fig, ax = plt.subplots(figsize=(6,6))
+                            myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(ethnicity_count))]
+
+                            ax.pie(ethnicity_count, labels=ethnicity_count.index, 
+                                   autopct='%1.1f%%',explode=myexplosion)
+                            ax.set_title("Ethnicity Distribution")
+                            ax.legend(ethnicity_count.index, loc="best")
+
                             st.pyplot(fig)
                     
                     with tab5:
@@ -397,13 +408,21 @@ def evaluation_form():
                         col1, col2 = st.columns(2)
                         with col1:
                             marketing_counts = df["marketing"].value_counts().sort_values(ascending=False)
-                            fig, ax = plt.subplots()
-                            ax.pie(marketing_counts, labels=marketing_counts.index, autopct='%1.1f%%')
+                            fig, ax = plt.subplots(figsize=(6,6))
+                            myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(marketing_counts))]
+                            ax.pie(marketing_counts, labels=marketing_counts.index,
+                                   autopct='%1.1f%%',explode=myexplosion,startangle=90)
+                            ax.set_title("Marketing Pipelines")
+                            ax.legend(marketing_counts.index, loc="best")
                             st.pyplot(fig)
                         with col2:
                             social_media_counts = df["social_media"].value_counts().sort_values(ascending=False)
-                            fig, ax = plt.subplots()
-                            ax.pie(social_media_counts, labels=social_media_counts.index, autopct='%1.1f%%')
+                            fig, ax = plt.subplots(figsize=(6,6))
+                            myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(social_media_counts))]
+                            ax.pie(social_media_counts, labels=social_media_counts.index,
+                                   autopct='%1.1f%%',explode=myexplosion,startangle=90)
+                            ax.set_title("Preferred Social Media")
+                            ax.legend(social_media_counts.index, loc="best")
                             st.pyplot(fig)
                     
                     with tab7:
@@ -412,9 +431,9 @@ def evaluation_form():
                             #st.markdown("**<span style='color: red;'>Future Attendance Intent</span>**", unsafe_allow_html=True)
                             ex_ratings_counts = df["q1"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots()
-                            ax.barh(ex_ratings_counts.index, ex_ratings_counts, color=["gold", "silver", "brown", "blue", "red"])
-                            ax.set_xlabel("Ratings Score")#,"green","blue","gold","grey"
-                            ax.set_ylabel("Exhibition Ratings")
+                            ax.bar(ex_ratings_counts,ex_ratings_counts.index, color=["gold", "green", "brown", "blue", "red"])
+                            ax.set_xlabel("How did you find the exhibition story?")#,"green","blue","gold","grey"
+                            ax.set_ylabel("Rating Score")
                             st.pyplot(fig)
 
                 with st.container():
@@ -439,9 +458,9 @@ def evaluation_form():
                         df_sentiments = pd.DataFrame([sentiment_results])
     
                         # Display the sentiment analysis results in a table
-                        st.write("Sentiment Analysis Results:")
+                        #st.write("Sentiment Analysis Results:")
                         #st.table(df_sentiments)
-                        st.dataframe(df_sentiments)
+                        df_sentiments_1 =df_sentiments
 
                         #social_media_counts = df["social_media"].value_counts().sort_values(ascending=False)
                         l1=df_sentiments['Positive'].iloc[0]
@@ -451,15 +470,17 @@ def evaluation_form():
                       
                         sentiments_count_x=['Positive','Neutral','Negative']
                         mycolours=["gold","blue","red"]
-                        myexplode = [0.2, 0, 0]
-                        fig, ax = plt.subplots(figsize=(2,2))
+                        myexplode= [0.2 if i % 3 == 0 else 0 for i in range(len(sentiments_count))]
+                        fig, ax = plt.subplots(figsize=(6,6))
                         ax.pie(sentiments_count,labels=sentiments_count_x, autopct='%1.1f%%', 
-                               colors=mycolours, explode=myexplode,textprops={'fontsize': 3},startangle=90)
-                        #ax.set_title("Sentiment Analysis", fontsize=12)
-                        # Position legend to the right and adjust font size
-                        ax.legend(sentiments_count_x, loc="right", bbox_to_anchor=(1.2, 0.5), fontsize=4)
-
+                               colors=mycolours, explode=myexplode,textprops={'fontsize': 10},startangle=90)
+                        
+                        ax.legend(sentiments_count_x, loc="best")
+                        ax.set_title("Sentiment Analysis Results:")
+                        
                         st.pyplot(fig)
+
+                        st.dataframe(df_sentiments_1)
 
 
 
