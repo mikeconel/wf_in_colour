@@ -311,9 +311,17 @@ def evaluation_form():
                         time.sleep(0.5)
                         st.success("**✅ Your response has been recorded!**")
                         st.write_stream(stream_data)
-                        st.write(" ")
-                        st.markdown("<p style=font-style:'Arial;color:red'>Why not head over to our website? www.windrushfoundation.com</p>",
-                                    unsafe_allow_html=True)
+                        time.sleep(0.5)
+                        
+                        # Redirect to Windrush Foundation website
+                        st.write("**🌐:red[Redirecting...]**")
+                        time.sleep(1)
+                       
+                        st.markdown("""
+                            <meta http-equiv="refresh" content="3;url=https://www.windrushfoundation.com">
+                                <p>You will be redirected to the Windrush Foundation website in 3 seconds...</p>
+                                """, unsafe_allow_html=True)
+
                         conn.close()
                     except Exception as e:
                         st.error(f"❌ Could not insert data: {str(e)}")
@@ -509,7 +517,7 @@ def evaluation_form():
                     height: 50px;">
                     <p style="color: white; font-size: 15px; 
                     font-weight: bold; font-variant: small-caps; text-align: center; margin: 0;">
-                    Designed by BIS Digital Solutions
+                    Designed by BIS Smart Digital Solutions
                     </p>
                     </div> """, unsafe_allow_html=True)
 
