@@ -20,6 +20,54 @@ def exhibition_database():
     conn = sqlite3.connect("wf.db")
     return conn
 
+def handle_dates():
+    """Central date range handler with persistent state"""
+    # Store absolute min/max dates separately
+    if 'absolute_dates' not in st.session_state:
+        #current_date=datetime.now().strftime("%y:%m:%d")
+        try:
+            conn = exhibition_database()
+            cur=conn.cursor()
+            cur.execute("SELECT MIN(mydate) FROM windrushincolour")
+            min_date_result = cur.fetchone()[0]
+
+            cur.execute("SELECT MAX(mydate) FROM windrushincolour")
+            max_date_result = cur.fetchone()[0]
+
+            conn.close()
+
+            # Convert to datetime.date if strings
+            min_date = pd.to_datetime(min_date_result).date()
+            max_date = pd.to_datetime(max_date_result).date()
+
+            st.session_state.absolute_dates = (min_date, max_date)      
+            conn.close()
+            st.session_state.absolute_dates = (min_date, max_date)
+        except Exception as e:
+            st.error(f"Data for this date does not exists {str(e)}")
+            return
+        
+     # Initialize with absolute dates if not set
+    if 'date_range' not in st.session_state:
+        st.session_state.date_range = list(st.session_state.absolute_dates)
+
+    # Show date picker with boundaries
+    new_dates = st.date_input(
+        "Select Date Range",
+        value=st.session_state.date_range,
+        min_value=st.session_state.absolute_dates[0],
+        max_value=st.session_state.absolute_dates[1],
+        key="global_date_picker"
+    )
+
+    if isinstance(new_dates, (list, tuple)) and len(new_dates) == 2:
+        st.session_state.date_range = new_dates
+        
+# participants = Participant.objects.filter(
+           # created_at__date__gte=st.session_state.date_range[0],
+           # created_at__date__lte=st.session_state.date_range[1])
+
+
 salutation=("Thank you for taking the time out to complete this form.")
 def stream_data():
     for word in salutation.split(" "):
@@ -82,6 +130,8 @@ def evaluation_form():
         border-color: #C4A747 !important;
     }
 
+    
+
     /* Button styling */
     .stForm button {
         background-color: #C4A747 !important;
@@ -127,6 +177,10 @@ def evaluation_form():
     border-radius: 8px;
 }
 
+[data-testid="stSelectbox"] label {
+        color: black !important;
+        }
+
 .stSelectbox-container-form button {
     background-color: #C4A747 !important;
 }
@@ -139,14 +193,12 @@ def evaluation_form():
     background-color: #6495ED;
 }
 
-        
+        [data-testid="stTextArea"] label {
+        color: black !important;
+        }
 
-        /* Text area styling */
-        [data-testid="stTextArea"] textarea {
-            background-color: #F8FAFC !important;
-            border: 1px solid #1E3A8A !important;
-            border-radius: 8px !important;
-            color: #1E3A8A !important;
+        [data-testid="stNumberInput"] label {
+        color: black !important;
         }
 
         /* Target password input label specifically */
@@ -202,21 +254,8 @@ def evaluation_form():
         with st.container():
             st.image(logo_path)
             col1,col2,col3 = st.columns([1,1,1])     
-            #with col2:
-                #st.image(logo_path, width=200)
             
             col1,col2,col3 = st.columns([1,8,1])
-            #with col3:
-                #st.image(logo_path, width=200)
-                #cola,colb=st.columns([1,3])
-                #with cola:
-                    #st.image(logo_path, width=150)
-                #with colb:
-                    #st.image(logo_path, width=200)
-                    #st.header(":rainbow[Windrush in Colour Exhibition]")
-         
-            with col2:
-                pass
            
             with col2:
                 st.markdown(
@@ -252,11 +291,11 @@ def evaluation_form():
                     a,col_b,c = st.columns([1,3,1])
                     with col_b:
                         marketing = st.selectbox("**How did you hear about this exhibition:**", [
-                        "None", "Radio", "TV", "Email", "Word of Mouth", "Social Media"
+                        " ", "Radio", "TV", "Email", "Word of Mouth", "Social Media"
                         ])
                    
                         social_media = st.selectbox("**If via Social Media, select the social media platform:**", [
-                            "None", "YouTube", "Facebook", "Instagram", "WhatsApp", "Messenger", "LinkedIn",
+                            "Don't us social media", "YouTube", "Facebook", "Instagram", "WhatsApp", "Messenger", "LinkedIn",
                             "Telegram", "Signal", "Snapchat", "TikTok"
                             ])
 
@@ -264,21 +303,22 @@ def evaluation_form():
                     a,col_b,c = st.columns([1,3,1])
                     with col_b:
                         q1 = st.selectbox("**How did you find the exhibition story?**",
-                            [5, 4, 3, 2, 1],
+                            [0, 5, 4, 3, 2, 1],
                             format_func=lambda x: {
+                            0:  " ",
                             5: "5. Very Interesting",
                             4: "4. Interesting",
                             3: "3. Okay",
                             2: "2. Boring",
                             1: "1. Did not like it at all"
                             }[x])
-                        q2 = st.text_input("**How did the story make you feel?**",max_chars=300)
+                        q2 = st.text_area("**How did the story make you feel?**",max_chars=300)
                         q3 = st.selectbox("**How did you find the venue?**",
-                        ["None ", "Very Comfortable", "Uncomfortable", "Couldn't wait to leave"])
-                        q4 = st.selectbox("**Will you attend more Windrush events/exhibitions?**",
+                        [" ", "Very Comfortable", "Uncomfortable", "Couldn't wait to leave"])
+                        q4 = st.selectbox("**Will you attend Windrush Foundation events/exhibitions in the future?**",
                         [" ", "Absolutely Yes", "Maybe", "No"])
                         feedback = st.text_area("**Please use this space to add further comments about this exhibition.**",max_chars=800)
-                        q5 = st.text_input("**If you would like to keep informed about future Windrush Foundation events, please leave a valid e-mail address.**")
+                        q5 = st.text_input("**If you would like to keep informed about future Windrush Foundation events, please leave a valid e-mail address.**",max_chars=80)
                     a,col_b,c = st.columns([1,3,2])
                     with c:
                         submitted = st.form_submit_button("**Submit**")
@@ -347,6 +387,7 @@ def evaluation_form():
             with colb:
                 st.subheader("📊:rainbow[Windrush In Colour Dashboard]")
                 #st.write("**Login below to see :rainbow['Windrush In Colour'] exhibition insights.**")
+            handle_dates()
             st.markdown("""<hr style='border: 2px solid #C4A747;'>""", unsafe_allow_html=True)
 
 
@@ -361,35 +402,86 @@ def evaluation_form():
                     with tab1:
                         col1, col2, col3 = st.columns([1, 1, 1])
                         with col2:
-                            #st.markdown("**<span style='color: red;'>Participant Count</span>**", unsafe_allow_html=True)
-                            participant_counts = df["name"]
-                            participant_counts=len(participant_counts)
-                            st.metric(label="**Participant Count**",value=participant_counts,delta=0.5, delta_color="inverse")
+                            df["mydate"]= pd.to_datetime(df['mydate'])
+                            # Filter based on selected date range
+                            filtered_df = df[
+                                (df["mydate"].dt.date >= st.session_state.date_range[0]) &
+                                (df["mydate"].dt.date <= st.session_state.date_range[1])
+                                ]
+
+                            # Count participants by name (or any unique identifier)
+                            participant_counts = filtered_df["name"].nunique()  # or len(filtered_df) if names can repeat
+
+                            st.metric(
+                                label="Participant Count",
+                                value=participant_counts,
+                                delta=0.5,
+                                delta_color="inverse"
+                                )
 
                     with tab2:
                         col1, col2, col3 = st.columns([1, 3, 1])
                         with col2:
-                            #st.markdown("**<span style='color: red;'>Gender Distribution</span>**", unsafe_allow_html=True)
-                            gender_count = df["gender"].value_counts().sort_values(ascending=False)
+                            df["mydate"]= pd.to_datetime(df['mydate'])
+                            # Filter based on selected date range
+                            filtered_df = df[
+                                (df["mydate"].dt.date >= st.session_state.date_range[0]) &
+                                (df["mydate"].dt.date <= st.session_state.date_range[1])
+                                ]
+
+                            # Count participants by name (or any unique identifier)
+                            #participant_counts = filtered_df["name"].nunique()  # or len(filtered_df) if names can repeat
+
+                            
+                            gender_count = filtered_df["gender"].value_counts().sort_values(ascending=False)
+                            #gender_count = df["gender"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots()
                             ax.pie(gender_count, labels=gender_count.index, autopct='%1.1f%%')
                             st.pyplot(fig)
+                            st.table(gender_count)
 
                     with tab3:
-                        col1, col2, col3 = st.columns([1, 3, 1])
+                        col1, col2, col3 = st.columns([1, 8, 1])
                         with col2:
                             #st.markdown("**<span style='color: red;'>Age Distribution</span>**", unsafe_allow_html=True)
                             fig, ax = plt.subplots()
-                            ax.hist(df["age"], bins=10, color='blue', edgecolor='gold')
+                            ax.hist(filtered_df["age"], bins=10, color='blue', edgecolor='gold')
                             ax.set_xlabel("Age")
                             ax.set_ylabel("Number of Attendees")
                             st.pyplot(fig)
 
+                            cola,colb,colc =st.columns(3)
+                            min_age = filtered_df["age"].min()
+                            metric_label = "Minimum Age"
+                            metric_value = f":blue[{min_age}]"
+
+                            mean_age = filtered_df["age"].mean()
+                            metric_label_2 = "Average Age"
+                            metric_value_2 = f":red[{mean_age}]"
+
+                            max_age = filtered_df["age"].max()
+                            metric_label_3 = "Maximum Age"
+                            metric_value_3 = f":blue[{max_age}]"
+
+                            col1, col2, col3= st.columns(3)
+                            with col1:
+                                st.markdown(f"**{metric_label}: {metric_value}**")
+                                min_age_count = (filtered_df["age"] == min_age).sum()
+                                st.metric('Total Min Age People',min_age_count)
+                            with col2:
+                                st.markdown(f"**{metric_label_2}: {metric_value_2}**")  # styled
+                                median_age = filtered_df["age"].median()
+                                median_age_count = (filtered_df["age"] == median_age).sum()
+                                st.metric('Total Median Age People',median_age_count)
+                            with col3:
+                                st.markdown(f"**{metric_label_3}: {metric_value_3}**")  # styled
+                                max_age_count = (filtered_df["age"] == max_age).sum()
+                                st.metric('Total Max Age People',max_age_count)
                     with tab4:
                         col1, col2, col3 = st.columns([1, 3, 1])
                         with col2:
                             #st.markdown("**<span style='color: red;'>Ethnicity Distribution</span>**", unsafe_allow_html=True)
-                            ethnicity_count = df["ethnicity"].value_counts().sort_values(ascending=False)
+                            ethnicity_count = filtered_df["ethnicity"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots(figsize=(6,6))
                             myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(ethnicity_count))]
 
@@ -404,7 +496,7 @@ def evaluation_form():
                         col1, col2, col3 = st.columns([1, 3, 1])
                         with col2:
                             #st.markdown("**<span style='color: red;'>Future Attendance Intent</span>**", unsafe_allow_html=True)
-                            intent_counts = df["q4"].value_counts()
+                            intent_counts = filtered_df["q4"].value_counts()
                             fig, ax = plt.subplots()
                             ax.bar(intent_counts.index, intent_counts, color=['green', 'orange', 'red'])
                             ax.set_xlabel("Response")
@@ -413,7 +505,7 @@ def evaluation_form():
                     with tab6:
                         col1, col2 = st.columns(2)
                         with col1:
-                            marketing_counts = df["marketing"].value_counts().sort_values(ascending=False)
+                            marketing_counts = filtered_df["marketing"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots(figsize=(6,6))
                             myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(marketing_counts))]
                             ax.pie(marketing_counts, labels=marketing_counts.index,
@@ -422,7 +514,7 @@ def evaluation_form():
                             ax.legend(marketing_counts.index, loc="best")
                             st.pyplot(fig)
                         with col2:
-                            social_media_counts = df["social_media"].value_counts().sort_values(ascending=False)
+                            social_media_counts = filtered_df["social_media"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots(figsize=(6,6))
                             myexplosion = [0.2 if i % 3 == 0 else 0 for i in range(len(social_media_counts))]
                             ax.pie(social_media_counts, labels=social_media_counts.index,
@@ -435,7 +527,7 @@ def evaluation_form():
                         cola, col2, colc = st.columns([1,2,1])
                         with col2:
                             #st.markdown("**<span style='color: red;'>Future Attendance Intent</span>**", unsafe_allow_html=True)
-                            ex_ratings_counts = df["q1"].value_counts().sort_values(ascending=False)
+                            ex_ratings_counts = filtered_df["q1"].value_counts().sort_values(ascending=False)
                             fig, ax = plt.subplots()
                             ax.bar(ex_ratings_counts,ex_ratings_counts.index, color=["gold", "green", "brown", "blue", "red"])
                             ax.set_xlabel("How did you find the exhibition story?")#,"green","blue","gold","grey"
@@ -447,11 +539,14 @@ def evaluation_form():
                     st.markdown("""<hr style='border: 2px; solid #C4A747;'>""", unsafe_allow_html=True)
                     tab1, tab2, tab3 = st.tabs(["Time Series Data","Sentiment Analysis","Show Evaluation Database"])
                     with tab1:
-                        pass #TIME SERIES Graph
+                        st.write("**:red[This will be a histogram and scatter chart!!!]**")
+                       
                     with tab2:
-                        ans=df['feedback']
-                        #st.write(ans)
-                        total_sentiments = sentiment_analysis(ans)
+                        ans=filtered_df['feedback']
+                        ans2=filtered_df['q2']
+                        ans_total=ans+ans2
+                        #st.write(type(ans2))
+                        total_sentiments = sentiment_analysis(ans_total)
                         
                          # Create a dictionary to store the sentiment analysis results
                         sentiment_results = {
@@ -466,7 +561,7 @@ def evaluation_form():
                         # Display the sentiment analysis results in a table
                         #st.write("Sentiment Analysis Results:")
                         #st.table(df_sentiments)
-                        df_sentiments_1 =df_sentiments
+                        df_sentiments_1=df_sentiments
 
                         #social_media_counts = df["social_media"].value_counts().sort_values(ascending=False)
                         l1=df_sentiments['Positive'].iloc[0]
@@ -483,15 +578,16 @@ def evaluation_form():
                         
                         ax.legend(sentiments_count_x, loc="best")
                         ax.set_title("Sentiment Analysis Results:")
-                        
-                        st.pyplot(fig)
-
-                        st.dataframe(df_sentiments_1)
+                        col1,col2,col3 = st.columns([1,4,1])
+                        with col2:
+                            st.pyplot(fig)
+                        with col2:
+                            st.dataframe(df_sentiments_1)
 
 
 
                     with tab3:
-                        st.dataframe(df)
+                        st.dataframe(filtered_df)
 
                     # if st.button("Show Evaluation Database"):
                     #     st.dataframe(df)
@@ -521,6 +617,7 @@ def evaluation_form():
                     </p>
                     </div> """, unsafe_allow_html=True)
 
+
 def sentiment_analysis(responses):
     analysis={
                 'positive':0,
@@ -539,7 +636,7 @@ def sentiment_analysis(responses):
                 analysis["neutral"] += 1
         total=sum(analysis.values()) or 1
 
-        return {k:round((v/total)*100,1) for k,v in analysis.items()}
+    return {k:round((v/total)*100,1) for k,v in analysis.items()}
 
 
 if __name__ == "__main__":
