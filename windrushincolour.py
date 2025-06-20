@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 from PIL import Image
 import sqlite3
 from textblob import TextBlob
@@ -28,10 +29,10 @@ def handle_dates():
         try:
             conn = exhibition_database()
             cur=conn.cursor()
-            cur.execute("SELECT MIN(mydate) FROM windrushincolour")
+            cur.execute("SELECT MIN(mydate) FROM windrushincolour_2")
             min_date_result = cur.fetchone()[0]
 
-            cur.execute("SELECT MAX(mydate) FROM windrushincolour")
+            cur.execute("SELECT MAX(mydate) FROM windrushincolour_2")
             max_date_result = cur.fetchone()[0]
 
             conn.close()
@@ -62,13 +63,10 @@ def handle_dates():
 
     if isinstance(new_dates, (list, tuple)) and len(new_dates) == 2:
         st.session_state.date_range = new_dates
-        
-# participants = Participant.objects.filter(
-           # created_at__date__gte=st.session_state.date_range[0],
-           # created_at__date__lte=st.session_state.date_range[1])
 
 
-salutation=("Thank you for taking the time out to complete this form.")
+
+salutation=(f"**:red[Thank you for taking the time out to complete this form.]**")
 def stream_data():
     for word in salutation.split(" "):
         yield word + " "
@@ -246,6 +244,7 @@ def evaluation_form():
     # Current date
     now = datetime.now()
     mydate = now.strftime("%Y-%m-%d")
+    mytime = now.strftime("%H:%M:%S")
     # Logo
     logo = "images/Windrush In Colour Exhibition_LOGO 3.png"
     logo_path = Image.open(logo)
@@ -276,7 +275,7 @@ def evaluation_form():
                 
                     with col_b:
                         name = st.text_input("**Name**")
-                        gender = st.selectbox("**Gender:**", ["Male", "Female"])
+                        gender = st.selectbox("**Gender:**", ["Male", "Female","Not specified"])
                         age = st.number_input("**Age**", min_value=15, step=1)
                         ethnicity = st.selectbox("**Ethnicity**", ["None",
                         "African", "Asian", "Asian British", "Black British", "Black mixed", "Caribbean",
@@ -329,23 +328,24 @@ def evaluation_form():
                         conn = exhibition_database()
                         cur = conn.cursor()
                         cur.execute('''
-                            CREATE TABLE IF NOT EXISTS windrushincolour (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            CREATE TABLE IF NOT EXISTS windrushincolour_2 (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT, gender TEXT, age INTEGER, ethnicity TEXT, location TEXT,
                                 feedback TEXT, marketing TEXT, social_media TEXT,
-                                q1 INTEGER, q2 TEXT, q3 TEXT, q4 TEXT, q5 TEXT, q6 TEXT, mydate TEXT
+                                q1 INTEGER, q2 TEXT, q3 TEXT, q4 TEXT, q5 TEXT, q6 TEXT, mydate TEXT, mytime TEXT
                             )
                         ''')
 
                         cur.execute('''
-                            INSERT INTO windrushincolour
+                            INSERT INTO windrushincolour_2
                             (name, gender, age, ethnicity, location, feedback, marketing, social_media,
-                            q1, q2, q3, q4, q5, q6, mydate)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            q1, q2, q3, q4, q5, q6, mydate,mytime)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
                         ''', (
                             name, gender, age, ethnicity, location, feedback, marketing,
                             social_media if marketing == "Social Media" else None,
-                            q1, q2, q3, q4, q5, q6, mydate
+                            q1, q2, q3, q4, q5, q6, mydate, mytime
                         ))
+                        
 
                         conn.commit()
                         time.sleep(0.5)
@@ -393,8 +393,12 @@ def evaluation_form():
 
             try:
                 conn = exhibition_database()
-                df = pd.read_sql_query("SELECT * FROM windrushincolour", conn)
+                df = pd.read_sql_query("SELECT * FROM windrushincolour_2", conn)
                 conn.close()
+
+              ###  df = df.fillna(0)  # Replace NaN values with 0
+              ###  df.replace([np.inf, -np.inf], np.nan, inplace=True)  # Handle infinite values
+              ###  df.dropna(inplace=True)  # Remove rows with NaN if necessary
 
                 with st.container():  # Replaces problematic expander
                     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Participant Count", "Gender Distribution", "Age Distribution", "Ethnicity Distribution","Future Attendance Intent","Marketing","Exhibition Ratings"])
@@ -402,15 +406,16 @@ def evaluation_form():
                     with tab1:
                         col1, col2, col3 = st.columns([1, 1, 1])
                         with col2:
-                            df["mydate"]= pd.to_datetime(df['mydate'])
-                            # Filter based on selected date range
+                            df["mydate"] = pd.to_datetime(df["mydate"], format="%Y-%m-%d", errors="coerce")
+                            df["mytime"] = pd.to_datetime(df["mytime"], format="%H:%M:%S", errors="coerce")
+                                                        # Filter based on selected date range
                             filtered_df = df[
                                 (df["mydate"].dt.date >= st.session_state.date_range[0]) &
                                 (df["mydate"].dt.date <= st.session_state.date_range[1])
                                 ]
-
+                            
                             # Count participants by name (or any unique identifier)
-                            participant_counts = filtered_df["name"].nunique()  # or len(filtered_df) if names can repeat
+                            participant_counts = filtered_df["id"].nunique()  # or len(filtered_df) if names can repeat
 
                             st.metric(
                                 label="Participant Count",
@@ -422,7 +427,6 @@ def evaluation_form():
                     with tab2:
                         col1, col2, col3 = st.columns([1, 3, 1])
                         with col2:
-                            df["mydate"]= pd.to_datetime(df['mydate'])
                             # Filter based on selected date range
                             filtered_df = df[
                                 (df["mydate"].dt.date >= st.session_state.date_range[0]) &
@@ -539,7 +543,40 @@ def evaluation_form():
                     st.markdown("""<hr style='border: 2px; solid #C4A747;'>""", unsafe_allow_html=True)
                     tab1, tab2, tab3 = st.tabs(["Time Series Data","Sentiment Analysis","Show Evaluation Database"])
                     with tab1:
-                        st.write("**:red[This will be a histogram and scatter chart!!!]**")
+                        import matplotlib.dates as mdates
+                        col_1,col_2= st.columns(2)
+                        st.write("**:red[Frequency of participants throughout the day!!!]**")
+                        with col_1:
+                            start_time = datetime.strptime("00:01:00", "%H:%M:%S").time()
+                            end_time = datetime.strptime("23:59:59", "%H:%M:%S").time()
+
+                            participant_time = df[(df["mytime"].dt.time >= start_time) & (df["mytime"].dt.time <= end_time)]
+                            fig, ax = plt.subplots()
+                            # Histogram
+                            ax.hist(participant_time["mytime"], bins=10, color='blue', edgecolor='gold')
+
+                            # X-axis labels and formatting
+                            ax.set_xlabel("Time")
+                            ax.set_ylabel("Number of Participants")
+
+                            # Convert x-axis to display proper time format
+                            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+                            # Set x-axis limits manually
+                            ax.set_xlim(pd.to_datetime("00:01:00", format="%H:%M:%S"), pd.to_datetime("23:59:59", format="%H:%M:%S"))
+
+                            st.pyplot(fig)
+
+                        with col_2:
+                            fig, ax = plt.subplots()
+                            
+                            ax.scatter(participant_time["mytime"], participant_time["id"], color='red', alpha=0.7)
+                            # Formatting X-axis
+                            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+                            ax.set_xlabel("Time")
+                            ax.set_ylabel("Participant ID")
+                            st.pyplot(fig)
+                           
                        
                     with tab2:
                         ans=filtered_df['feedback']
@@ -595,6 +632,7 @@ def evaluation_form():
                 if st.button("🔒 Logout"):
                     st.session_state['authenticated'] = False
                     st.success("You have been logged out.")
+                    st.rerun()
                 return df
             except Exception as e:
                 st.error(f"Dashboard Error: {str(e)}")
@@ -617,8 +655,8 @@ def evaluation_form():
                     </p>
                     </div> """, unsafe_allow_html=True)
 
-
 def sentiment_analysis(responses):
+  
     analysis={
                 'positive':0,
                 'neutral':0,
@@ -634,7 +672,7 @@ def sentiment_analysis(responses):
                 analysis["negative"] += 1
             else:
                 analysis["neutral"] += 1
-        total=sum(analysis.values()) or 1
+    total=sum(analysis.values()) or 1
 
     return {k:round((v/total)*100,1) for k,v in analysis.items()}
 
